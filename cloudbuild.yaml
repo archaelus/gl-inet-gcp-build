@@ -1,0 +1,43 @@
+steps:
+  - id: cache-gl-inet-base
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['pull', 'gcr.io/$PROJECT_ID/gl-inet-base']
+  - id: gl-inet-base
+    name: gcr.io/cloud-builders/docker
+    args: [
+            'build', '--rm=false',
+            '--cache-from',
+            'gcr.io/$PROJECT_ID/gl-inet-base',
+            '-t', 'gcr.io/$PROJECT_ID/gl-inet-base',
+            '-f', 'Dockerfile.gl-inet-base',
+            '.'
+          ]
+  - id: gl-mifi-firmware-build
+    name: gcr.io/cloud-builders/docker
+    args: [
+            'build', '--rm=false',
+            '--build-arg', 'PROJECT_ID=$PROJECT_ID',
+            '-t', 'gcr.io/$PROJECT_ID/gl-mifi-firmware-build',
+            '-f', 'Dockerfile.gl-mifi-firmware-build',
+            '.'
+          ]
+  - id: extract-firmware-create
+    name: gcr.io/cloud-builders/docker
+    args: [
+            'create', '--name', 'extract',
+            'gcr.io/$PROJECT_ID/gl-mifi-firmware-build'
+          ]
+  - id: extract-firmware-cp
+    name: gcr.io/cloud-builders/docker
+    args: ['cp', 'extract:/opt/lede/bin/ar71xx', 'ar71xx']
+  - id: extract-firmware-rm
+    name: gcr.io/cloud-builders/docker
+    args: ['rm', '-f', 'extract']
+  - id: debug-ls
+    name: ubuntu
+    args: ['ls', '-la', 'ar71xx']
+  - id: publish
+    name: 'gcr.io/cloud-builders/gsutil'
+    args: ['cp', '-r', 'ar71xx', 'gs://gl-mifi-firmware/$BUILD_ID']
+images:
+  ['gcr.io/$PROJECT_ID/gl-inet-base']

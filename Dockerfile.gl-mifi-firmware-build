@@ -1,0 +1,11 @@
+# lede dockerfile for gl-inet mifi. Adapted from bnfnet/lede-openwrt
+#
+ARG PROJECT_ID
+FROM gcr.io/$PROJECT_ID/gl-inet-base
+ENV LEDEUSER=lede \
+    LEDEDIR=/opt/lede
+
+USER ${LEDEUSER}
+WORKDIR ${LEDEDIR}
+
+RUN make image PROFILE="GL-MIFI" PACKAGES="luci blkid block-mount kmod-fs-ext4 kmod-usb2 kmod-usb-uhci kmod-usb-ohci kmod-usb-storage" FILES=files/files-clean-ar/

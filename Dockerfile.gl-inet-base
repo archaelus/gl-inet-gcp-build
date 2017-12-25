@@ -1,0 +1,19 @@
+FROM ubuntu:14.04
+
+RUN apt-get update && apt-get install -y \
+    subversion build-essential git-core libncurses5-dev zlib1g-dev \
+    gawk flex quilt libssl-dev xsltproc libxml-parser-perl mercurial \
+    bzr ecj cvs unzip git wget
+
+ENV LEDEUSER=lede \
+    LEDEDIR=/opt/lede
+
+RUN useradd -m ${LEDEUSER}
+
+RUN mkdir -p ${LEDEDIR} \
+    && chown ${LEDEUSER}:${LEDEUSER} ${LEDEDIR}
+
+USER ${LEDEUSER}
+WORKDIR ${LEDEDIR}
+RUN git clone https://github.com/gl-inet/imagebuilder-cc-ar71xx.git ${LEDEDIR}
+RUN git clone https://github.com/gl-inet/openwrt-files.git ${LEDEDIR}/files
